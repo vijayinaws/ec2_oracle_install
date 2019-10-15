@@ -6,24 +6,24 @@
 
 - name: Download compat-libstdc++ rpm.
   get_url:
-    url: "{{ compat-libstdc_package_url }}"
-    dest: "{{ compat-libstdc_package_path }}"
+    url: "{{ compa_libstdc_package_url }}"
+    dest: "{{ compat_libstdc_package_path }}"
     mode: '0440'
 
 - name: Install compat-libstdc++ rpm package.
   yum:
-    name: "{{ compat-libstdc_package_path }}"
+    name: "{{ compat_libstdc_package_path }}"
     state: present
 
 - name: Download compat-libcap1 rpm.
   get_url:
-    url: "{{ compat-libcap1_package_url }}"
-    dest: "{{ compat-libcap1_package_path }}"
+    url: "{{ compat_libcap1_package_url }}"
+    dest: "{{ compat_libcap1_package_path }}"
     mode: '0440'
 
 - name: Install compat-libcap1 rpm package.
   yum:
-    name: "{{ compat-libcap1_package_path }}"
+    name: "{{ compat_libcap1_package_path }}"
     state: present
 
 - name: Download oracle preinstallation rpm.
