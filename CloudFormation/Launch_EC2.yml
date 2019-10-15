@@ -151,6 +151,8 @@ Resources:
           yum install ansible -y
           pip install boto3
           export no_proxy='127.0.0.1,localhost,satprod2.cc.emory.edu,satellite.service.emory.edu,169.254.169.254'
+          unset http_proxy
+          unset https_proxy
           git clone https://github.com/vijayinaws/ec2_oracle_install.git
           cd ec2_oracle_install/Ansible/
           ansible-playbook -i hosts playbook.yml --connection=local -vvv
