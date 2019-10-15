@@ -1,0 +1,50 @@
+---
+
+# Ansible role to install oracle rpm package on RedHat.
+
+- include_vars: "install_rhel.yml"  #include RedHat specific variable file.
+
+- name: Download compat-libstdc++ rpm.
+  get_url:
+    url: "{{ compat-libstdc_package_url }}"
+    dest: "{{ compat-libstdc_package_path }}"
+    mode: '0440'
+
+- name: Install compat-libstdc++ rpm package.
+  yum:
+    name: "{{ compat-libstdc_package_path }}"
+    state: present
+
+- name: Download compat-libcap1 rpm.
+  get_url:
+    url: "{{ compat-libcap1_package_url }}"
+    dest: "{{ compat-libcap1_package_path }}"
+    mode: '0440'
+
+- name: Install compat-libcap1 rpm package.
+  yum:
+    name: "{{ compat-libcap1_package_path }}"
+    state: present
+
+- name: Download oracle preinstallation rpm.
+  get_url:
+    url: "{{ oracle_preinstallation_rpm_package_url }}"
+    dest: "{{ oracle_preinstallation_rpm_package_path }}"
+    mode: '0440'
+
+- name: Install oracle preinstallation rpm package.
+  yum:
+    name: "{{ oracle_preinstallation_rpm_package_path }}"
+    state: present
+
+- name: Download oracle rpm package from s3 bucket.
+  aws_s3:
+    bucket: "{{ oracle_rpm_bucket_name }}"
+    object: "{{ oracle_rpm_package }}"
+    dest: "{{ oracle_rpm_package_path }}"
+    mode: get
+
+- name: Install oracle rpm package.
+  yum:
+    name: "{{ oracle_rpm_package_path }}"
+    state: present

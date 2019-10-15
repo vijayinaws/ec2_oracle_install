@@ -1,0 +1,20 @@
+---
+# vars file for install_oracle for RedHat OS.
+oracle_working_directory: "/opt"
+
+oracle_preinstallation_rpm_package_url: "https://yum.oracle.com/repo/OracleLinux/OL7/latest/x86_64/getPackage/oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm"
+oracle_preinstallation_rpm_package: "oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm"
+oracle_preinstallation_rpm_package_path: "{{ oracle_working_directory }}/{{ oracle_preinstallation_rpm_package }}"
+
+oracle_rpm_package: "oracle-database-ee-19c-1.0-1.x86_64.rpm"
+oracle_rpm_package_path: "{{ oracle_working_directory }}/{{ oracle_rpm_package }}"
+oracle_rpm_bucket_name: "emory-oracle-package"
+
+
+compat-libstdc_package_url:  "http://mirror.centos.org/centos/7/os/x86_64/Packages/compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm"
+compat-libstdc_package: "compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm"
+compat-libstdc_package_path: "{{ oracle_working_directory }}/{{ compat-libstdc_package }}"
+
+compat-libcap1_package_url:  "http://mirror.centos.org/centos/7/os/x86_64/Packages/compat-libcap1-1.10-7.el7.x86_64.rpm"
+compat-libcap1_package: "compat-libcap1-1.10-7.el7.x86_64.rpm"
+compat-libcap1_package_path: ""{{ oracle_working_directory }}/{{ compat-libcap1_package }}"
