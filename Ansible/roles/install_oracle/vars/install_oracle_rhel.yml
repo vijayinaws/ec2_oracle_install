@@ -17,4 +17,4 @@ compat_libstdc_package_path: "{{ oracle_working_directory }}/{{ compat_libstdc_p
 
 compat_libcap1_package_url:  "http://mirror.centos.org/centos/7/os/x86_64/Packages/compat-libcap1-1.10-7.el7.x86_64.rpm"
 compat_libcap1_package: "compat-libcap1-1.10-7.el7.x86_64.rpm"
-compat_libcap1_package_path: ""{{ oracle_working_directory }}/{{ compat_libcap1_package }}"
+compat_libcap1_package_path: "{{ oracle_working_directory }}/{{ compat_libcap1_package }}"

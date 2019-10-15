@@ -2,11 +2,11 @@
 
 # Ansible role to install oracle rpm package on RedHat.
 
-- include_vars: "install_rhel.yml"  #include RedHat specific variable file.
+- include_vars: "install_oracle_rhel.yml"  #include RedHat specific variable file.
 
 - name: Download compat-libstdc++ rpm.
   get_url:
-    url: "{{ compa_libstdc_package_url }}"
+    url: "{{ compat_libstdc_package_url }}"
     dest: "{{ compat_libstdc_package_path }}"
     mode: '0440'
 
