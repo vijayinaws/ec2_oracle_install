@@ -94,9 +94,9 @@ Resources:
   EC2Instance:
     Type: AWS::EC2::Instance
 
-    #CreationPolicy:
-    #  ResourceSignal:
-    #    Timeout: PT15M
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
 
     Properties:
       AvailabilityZone: !Ref AzName
@@ -152,14 +152,14 @@ Resources:
           pip install boto3
           export no_proxy='127.0.0.1,localhost,satprod2.cc.emory.edu,satellite.service.emory.edu,169.254.169.254'
           git clone https://github.com/vijayinaws/ec2_oracle_install.git
-          cd ec2_oracle_install/ansible/
-          #ansible-playbook playbook.yml
+          cd ec2_oracle_install/Ansible/
+          ansible-playbook -i hosts playbook.yml --connection=local -vvv
 
-          #/cft/aws/bin/cfn-signal \
-          #  -e $? \
-          #  --stack ${AWS::StackName} \
-          #  --resource EC2Instance \
-          #  --region ${AWS::Region}
+          /cft/aws/bin/cfn-signal \
+            -e $? \
+            --stack ${AWS::StackName} \
+            --resource EC2Instance \
+            --region ${AWS::Region}
 
 Outputs:
   EC2InstanceId:
