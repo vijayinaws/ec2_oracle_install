@@ -124,7 +124,7 @@ Resources:
                 - - "[cfn-auto-reloader-hook]\n"
                   - "triggers=post.update\n"
                   - "path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init\n"
-                  - 'action=/opt/aws/bin/cfn-init -v '
+                  - 'action=/cft/aws/bin/cfn-init -v '
                   - '         --stack '
                   - !Ref 'AWS::StackName'
                   - '         --resource EC2Instance '
@@ -140,7 +140,7 @@ Resources:
                   - "Description=cfn-hup daemon\n\n"
                   - "[Service]\n"
                   - "Type=simple\n"
-                  - "ExecStart=/opt/aws/bin/cfn-hup\n"
+                  - "ExecStart=/cft/aws/bin/cfn-hup\n"
                   - "Restart=always\n\n"
                   - "[Install]\n"
                   - WantedBy=multi-user.target
@@ -181,6 +181,7 @@ Resources:
           yum clean all
           subscription-manager refresh
           yum install katello-agent -y
+    
 
           echo "Installing packages..."
 
@@ -199,6 +200,12 @@ Resources:
           wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
           easy_install --script-dir /cft/aws/bin aws-cfn-bootstrap-latest.tar.gz
 
+          /cft/aws/bin/cfn-init -v \
+            --stack !Ref AWS::StackName \
+            --resource EC2Instance \
+            --configsets full_install \
+            --region !Ref AWS::Region 
+
           curl -o epel-release-latest-7.noarch.rpm  https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
           rpm -i epel-release-latest-7.noarch.rpm
           yum install ansible -y
@@ -210,13 +217,7 @@ Resources:
           unset https_proxy
           ansible-playbook -i hosts playbook.yml --connection=local -vvv
 
-          /opt/aws/bin/cfn-init -v \
-            --stack !Ref AWS::StackName \
-            --resource EC2Instance \
-            --configsets full_install \
-            --region !Ref AWS::Region 
-
-          /opt/aws/bin/cfn-signal \
+          /cft/aws/bin/cfn-signal \
             -e $? \
             --stack !Ref AWS::StackName \
             --resource EC2Instance \
