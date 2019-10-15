@@ -94,9 +94,62 @@ Resources:
   EC2Instance:
     Type: AWS::EC2::Instance
 
-    #CreationPolicy:
-    #  ResourceSignal:
-    #    Timeout: PT15M
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT25M
+    
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          full_install:
+            - install_and_enable_cfn_hup
+        install_and_enable_cfn_hup:
+          files:
+            /etc/cfn/cfn-hup.conf:
+              content: !Join
+                - ''
+                - - "[main]\n"
+                  - stack=
+                  - !Ref 'AWS::StackId'
+                  - "\n"
+                  - region=
+                  - !Ref 'AWS::Region'
+                  - "\n"
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Join
+                - ''
+                - - "[cfn-auto-reloader-hook]\n"
+                  - "triggers=post.update\n"
+                  - "path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init\n"
+                  - 'action=/opt/aws/bin/cfn-init -v '
+                  - '         --stack '
+                  - !Ref 'AWS::StackName'
+                  - '         --resource EC2Instance '
+                  - '         --configsets full_install '
+                  - '         --region '
+                  - !Ref 'AWS::Region'
+                  - "\n"
+                  - "runas=root\n"
+            /lib/systemd/system/cfn-hup.service:
+              content: !Join
+                - ''
+                - - "[Unit]\n"
+                  - "Description=cfn-hup daemon\n\n"
+                  - "[Service]\n"
+                  - "Type=simple\n"
+                  - "ExecStart=/opt/aws/bin/cfn-hup\n"
+                  - "Restart=always\n\n"
+                  - "[Install]\n"
+                  - WantedBy=multi-user.target
+          commands:
+            '01enable_cfn_hup':
+              command: systemctl enable cfn-hup.service
+            '02start_cfn_hup':
+              command: systemctl start cfn-hup.service
+
 
     Properties:
       AvailabilityZone: !Ref AzName
@@ -157,11 +210,18 @@ Resources:
           unset https_proxy
           ansible-playbook -i hosts playbook.yml --connection=local -vvv
 
-          #/cft/aws/bin/cfn-signal \
-          #  -e $? \
-          #  --stack ${AWS::StackName} \
-          #  --resource EC2Instance \
-          #  --region ${AWS::Region}
+          /opt/aws/bin/cfn-init -v \
+            --stack !Ref AWS::StackName \
+            --resource EC2Instance \
+            --configsets full_install \
+            --region !Ref AWS::Region 
+
+          /opt/aws/bin/cfn-signal \
+            -e $? \
+            --stack !Ref AWS::StackName \
+            --resource EC2Instance \
+            --region !Ref AWS::Region
+
 
 Outputs:
   EC2InstanceId:
