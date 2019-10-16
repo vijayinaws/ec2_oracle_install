@@ -174,7 +174,7 @@ Resources:
       Tenancy: default
       UserData:
         Fn::Base64: !Sub |
-          #!/bin/bash
+          #!/bin/bash -xe
           rpm -Uhv http://satprod2.cc.emory.edu/pub/katello-ca-consumer-latest.noarch.rpm
           subscription-manager register --org="EMORY-LITS_Organization" --activationkey="RHEL_7_DEV"
           yum check-update
@@ -199,29 +199,22 @@ Resources:
           mkdir -p /cft/aws/bin
           wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
           easy_install --script-dir /cft/aws/bin aws-cfn-bootstrap-latest.tar.gz
+          export no_proxy='127.0.0.1,localhost,satprod2.cc.emory.edu,satellite.service.emory.edu,169.254.169.254'
+          unset http_proxy
+          unset https_proxy
 
-          /cft/aws/bin/cfn-init -v \
-            --stack !Ref AWS::StackName \
-            --resource EC2Instance \
-            --configsets full_install \
-            --region !Ref AWS::Region 
+          /cft/aws/bin/cfn-init -v  --stack ${AWS::StackName} --resource EC2Instance --configsets full_install   --region ${AWS::Region} 
 
-          curl -o epel-release-latest-7.noarch.rpm  https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+           curl -o epel-release-latest-7.noarch.rpm  https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
           rpm -i epel-release-latest-7.noarch.rpm
           yum install ansible -y
           pip install boto3
-          export no_proxy='127.0.0.1,localhost,satprod2.cc.emory.edu,satellite.service.emory.edu,169.254.169.254'
+          
           git clone https://github.com/vijayinaws/ec2_oracle_install.git
           cd ec2_oracle_install/Ansible/
-          unset http_proxy
-          unset https_proxy
           ansible-playbook -i hosts playbook.yml --connection=local -vvv
 
-          /cft/aws/bin/cfn-signal \
-            -e $? \
-            --stack !Ref AWS::StackName \
-            --resource EC2Instance \
-            --region !Ref AWS::Region
+          /cft/aws/bin/cfn-signal  -e 0  --stack ${AWS::StackName}   --resource EC2Instance     --region ${AWS::Region} 
 
 
 Outputs:
