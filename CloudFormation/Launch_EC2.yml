@@ -15,18 +15,46 @@ Description: Create an AWS EC2 instance with a Ansible.
 
 Parameters:
 
+  InstanceType:
+    Description: Select EC2 instance type
+    Type: String
+    Default: t2.large
+    AllowedValues:
+      - t1.micro
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m1.small
+      - m1.medium
+      - m1.large
+      - m1.xlarge
+      - m2.xlarge
+      - m2.2xlarge
+      - m2.4xlarge
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.10xlarge
+  
   KeyName: 
     Description: "Name of an existing EC2 KeyPair to enable SSH access to the instance"
     Type: "AWS::EC2::KeyPair::KeyName"
     ConstraintDescription: "Can contain only ASCII characters."
 
-  AzName:
-    Type: AWS::EC2::AvailabilityZone::Name
-    Description: Select Availability Zone
-
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: Select VPC
+
+  AzName:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Select Availability Zone
 
   SubnetId:
     Type: AWS::EC2::Subnet::Id
@@ -41,9 +69,10 @@ Parameters:
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     ConstraintDescription: "Must be a valid IP CIDR range of the form x.x.x.x/x"
 
-  LatestAmazonLinux2AmiId:
-    Type : 'AWS::SSM::Parameter::Value<String>'
-    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  AmiId:
+    Description: Amazon Machine Image for EC2 instance.
+    Type : String
+    Default: 'ami-013d826abcb53dbdd'
 
 Resources:
   SGEC2:
@@ -57,17 +86,17 @@ Resources:
         CidrIp: !Ref SSHLocation
       VpcId: !Ref VpcId
 
-  AnsibleS3BucketsInstanceProfile: 
+  EC2InstanceProfile: 
     Type: "AWS::IAM::InstanceProfile"
     Properties: 
       Path: "/"
       Roles: 
-       - Ref: AnsibleS3BucketsRole
+       - Ref: S3BucketsRole
 
-  AnsibleS3BucketsPolicy: 
+  S3BucketsPolicy: 
     Type: "AWS::IAM::Policy"
     Properties: 
-      PolicyName: AnsibleS3BucketsPolicy
+      PolicyName: S3BucketsPolicy
       PolicyDocument: 
         Statement: 
          - Effect: Allow
@@ -75,9 +104,9 @@ Resources:
             - "s3:*"
            Resource: "*"
       Roles: 
-        - Ref: AnsibleS3BucketsRole
+        - Ref: S3BucketsRole
 
-  AnsibleS3BucketsRole: 
+  S3BucketsRole: 
     Type: "AWS::IAM::Role"
     Properties: 
       AssumeRolePolicyDocument: 
@@ -142,17 +171,16 @@ Resources:
             
     Properties:
       AvailabilityZone: !Ref AzName
-      ImageId: ami-013d826abcb53dbdd
+      ImageId: !Ref AmiId
       BlockDeviceMappings:
-        # Create a separate volume
         - DeviceName: /dev/sdf
           Ebs:
             DeleteOnTermination: false
             VolumeSize: 30
       KeyName: !Ref KeyName
-      IamInstanceProfile: !Ref AnsibleS3BucketsInstanceProfile
+      IamInstanceProfile: !Ref EC2InstanceProfile
       InstanceInitiatedShutdownBehavior: stop
-      InstanceType: t2.large
+      InstanceType: !Ref InstanceType
       Monitoring: 'true'
       NetworkInterfaces:
       - AssociatePublicIpAddress: 'true'
@@ -201,17 +229,17 @@ Resources:
           pip install boto3
           
           git clone https://github.com/vijayinaws/ec2_oracle_install.git
-          cd ec2_oracle_install/Ansible/
-          ansible-playbook -i hosts playbook.yml --connection=local -vvv
+          cd /ec2_oracle_install/Ansible/
+          ansible-playbook -i hosts playbook.yml --connection=local -vvv >> ansible-output.log
 
           /cft/aws/bin/cfn-signal  -e 0  --stack ${AWS::StackName}   --resource EC2Instance     --region ${AWS::Region} 
 
 
 Outputs:
   EC2InstanceId:
-    Description: EC2Instance Instance Id
+    Description: 'The EC2 instance id.'
     Value: !Ref EC2Instance
 
-  EC2InstanceIP:
-    Description: EC2Instance IP Address
-    Value: !GetAtt EC2Instance.PublicIp
+  PrivateIPAddress:
+    Description: 'The private IP address of the EC2 instance.'
+    Value: !GetAtt EC2Instance.PrivateIp
