@@ -96,61 +96,50 @@ Resources:
 
     CreationPolicy:
       ResourceSignal:
-        Timeout: PT25M
+        Timeout: PT60M
     
     Metadata:
       AWS::CloudFormation::Init:
-        configSets:
-          full_install:
-            - install_and_enable_cfn_hup
-        install_and_enable_cfn_hup:
+        config:
+
           files:
             /etc/cfn/cfn-hup.conf:
-              content: !Join
-                - ''
-                - - "[main]\n"
-                  - stack=
-                  - !Ref 'AWS::StackId'
-                  - "\n"
-                  - region=
-                  - !Ref 'AWS::Region'
-                  - "\n"
+              content: !Sub |
+                [main]
+                stack = ${AWS::StackId}
+                region = ${AWS::Region}
               mode: '000400'
               owner: root
               group: root
+    
             /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-              content: !Join
-                - ''
-                - - "[cfn-auto-reloader-hook]\n"
-                  - "triggers=post.update\n"
-                  - "path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init\n"
-                  - 'action=/cft/aws/bin/cfn-init -v '
-                  - '         --stack '
-                  - !Ref 'AWS::StackName'
-                  - '         --resource EC2Instance '
-                  - '         --configsets full_install '
-                  - '         --region '
-                  - !Ref 'AWS::Region'
-                  - "\n"
-                  - "runas=root\n"
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
+                action=/cft/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --region ${AWS::Region}
+                runas=root
+              mode: "000400"
+              owner: "root"
+              group: "root"
+
             /lib/systemd/system/cfn-hup.service:
-              content: !Join
-                - ''
-                - - "[Unit]\n"
-                  - "Description=cfn-hup daemon\n\n"
-                  - "[Service]\n"
-                  - "Type=simple\n"
-                  - "ExecStart=/cft/aws/bin/cfn-hup\n"
-                  - "Restart=always\n\n"
-                  - "[Install]\n"
-                  - WantedBy=multi-user.target
+              content: !Sub |
+                [Unit]
+                Description=cfn-hup daemon
+                [Service]
+                Type=simple
+                ExecStart=/cft/aws/bin/cfn-hup
+                Restart=always
+                [Install]
+                WantedBy=multi-user.target              
+    
           commands:
-            '01enable_cfn_hup':
+            01enable_cfn_hup:
               command: systemctl enable cfn-hup.service
-            '02start_cfn_hup':
+            02start_cfn_hup:
               command: systemctl start cfn-hup.service
-
-
+            
     Properties:
       AvailabilityZone: !Ref AzName
       ImageId: ami-013d826abcb53dbdd
@@ -163,7 +152,7 @@ Resources:
       KeyName: !Ref KeyName
       IamInstanceProfile: !Ref AnsibleS3BucketsInstanceProfile
       InstanceInitiatedShutdownBehavior: stop
-      InstanceType: t2.micro
+      InstanceType: t2.large
       Monitoring: 'true'
       NetworkInterfaces:
       - AssociatePublicIpAddress: 'true'
@@ -174,7 +163,7 @@ Resources:
       Tenancy: default
       UserData:
         Fn::Base64: !Sub |
-          #!/bin/bash -xe
+          #!/bin/bash 
           rpm -Uhv http://satprod2.cc.emory.edu/pub/katello-ca-consumer-latest.noarch.rpm
           subscription-manager register --org="EMORY-LITS_Organization" --activationkey="RHEL_7_DEV"
           yum check-update
@@ -202,10 +191,11 @@ Resources:
           export no_proxy='127.0.0.1,localhost,satprod2.cc.emory.edu,satellite.service.emory.edu,169.254.169.254'
           unset http_proxy
           unset https_proxy
+          
+          #yum install -y aws-cfn-bootstrap
+          /cft/aws/bin/cfn-init -v  --stack ${AWS::StackName} --resource EC2Instance  --region ${AWS::Region} 
 
-          /cft/aws/bin/cfn-init -v  --stack ${AWS::StackName} --resource EC2Instance --configsets full_install   --region ${AWS::Region} 
-
-           curl -o epel-release-latest-7.noarch.rpm  https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+          curl -o epel-release-latest-7.noarch.rpm  https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
           rpm -i epel-release-latest-7.noarch.rpm
           yum install ansible -y
           pip install boto3
