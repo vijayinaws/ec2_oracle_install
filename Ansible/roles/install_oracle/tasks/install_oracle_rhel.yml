@@ -1,41 +1,58 @@
 ---
 
 # Ansible role to install oracle rpm package on RedHat.
+# This role perform following tasks
+# - Check sufficient disk space to install oracle.
+# - Download All dependencies rpm packages.
+# - Install All dependencies.
+# - Copy oracle rpm file form s3 bucket.
+# - Install oracle.
+# - Clean rpm packages
 
-- include_vars: "install_oracle_rhel.yml"  #include RedHat specific variable file.
 
-- name: Download compat-libstdc++ rpm.
+
+#include RedHat specific variable file.
+
+- include_vars: "install_oracle_rhel.yml"
+
+#Check sufficient disk space.
+
+- name: Confirm sufficient disk space available on /opt/oracle
+  assert:
+    that:
+      - item.size_available|int > 35*1024*1024*1024
+  when: item.mount == "{{ oracle_working_directory }}"
+  with_items: "{{ ansible_mounts }}"
+  register: disk_free
+  ignore_errors: yes
+
+- name: Fail if insufficient disk space available
+  fail:
+    msg: "Insufficient space for {{ inventory_hostname }} on {{ oracle_working_directory }}. Need 25 GB free."
+  when: disk_free | json_query(query) | join(' ')  == "Assertion failed"
+  vars:
+    query: "results[?item.mount == '/opt/oracle'].msg"
+
+#Download all dependencies.
+
+- name: Download all dependencies.
   get_url:
-    url: "{{ compat_libstdc_package_url }}"
-    dest: "{{ compat_libstdc_package_path }}"
-    mode: '0440'
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: "0440"
+  loop:
+    - { url: "{{ compat_libstdc_package_url }}", dest: "{{ compat_libstdc_package_path }}" }
+    - { url: "{{ compat_libcap1_package_url }}", dest: "{{ compat_libcap1_package_path }}" }
+    - { url: "{{ oracle_preinstallation_rpm_package_url }}", dest: "{{ oracle_preinstallation_rpm_package_path }}" }
 
-- name: Install compat-libstdc++ rpm package.
+#Install all dependencies.
+
+- name: Install all dependencies.
   yum:
-    name: "{{ compat_libstdc_package_path }}"
+    name: "{{  list_of_packages  }}"
     state: present
 
-- name: Download compat-libcap1 rpm.
-  get_url:
-    url: "{{ compat_libcap1_package_url }}"
-    dest: "{{ compat_libcap1_package_path }}"
-    mode: '0440'
-
-- name: Install compat-libcap1 rpm package.
-  yum:
-    name: "{{ compat_libcap1_package_path }}"
-    state: present
-
-- name: Download oracle preinstallation rpm.
-  get_url:
-    url: "{{ oracle_preinstallation_rpm_package_url }}"
-    dest: "{{ oracle_preinstallation_rpm_package_path }}"
-    mode: '0440'
-
-- name: Install oracle preinstallation rpm package.
-  yum:
-    name: "{{ oracle_preinstallation_rpm_package_path }}"
-    state: present
+#Copy oracle from s3 bucket.
 
 - name: Download oracle rpm package from s3 bucket.
   aws_s3:
@@ -44,7 +61,24 @@
     dest: "{{ oracle_rpm_package_path }}"
     mode: get
 
+#install oracle
+
 - name: Install oracle rpm package.
   yum:
     name: "{{ oracle_rpm_package_path }}"
     state: present
+
+#Delete dependencies rpm files.
+
+- name: Delete dependencies rpm files.
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{  list_of_packages  }}"
+
+#Delete oracle rpm file.
+
+- name: Delete oracle rpm file.
+  file:
+    path: "{{ oracle_rpm_package_path }}"
+    state: absent

@@ -1,0 +1,28 @@
+---
+- name: install the awscli, boto3  packages, force upgrade.
+  pip: 
+    state: latest
+    name:
+      - awscli
+      - boto3
+
+- name: Create a aws cfn configuration directory.
+  file:
+    path: {{ aws_cfn_directory }}
+    state: directory
+    mode: '0755'
+
+- name: Download aws cfn bootstrap tar file.
+  get_url:
+    url: {{ aws_cfn_bootstrap_url }}
+    dest: {{ aws_cfn_directory }}
+    mode: '0440'
+
+- name: Install aws cfn bootstrap.
+  shell: easy_install --script-dir {{ aws_cfn_directory }} aws-cfn-bootstrap-latest.tar.gz
+
+
+
+
+
+  

@@ -1,6 +1,6 @@
 ---
 # vars file for install_oracle for RedHat OS.
-oracle_working_directory: "/opt"
+oracle_working_directory: "/opt/oracle"
 
 oracle_preinstallation_rpm_package_url: "https://yum.oracle.com/repo/OracleLinux/OL7/latest/x86_64/getPackage/oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm"
 oracle_preinstallation_rpm_package: "oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm"
@@ -18,3 +18,8 @@ compat_libstdc_package_path: "{{ oracle_working_directory }}/{{ compat_libstdc_p
 compat_libcap1_package_url:  "http://mirror.centos.org/centos/7/os/x86_64/Packages/compat-libcap1-1.10-7.el7.x86_64.rpm"
 compat_libcap1_package: "compat-libcap1-1.10-7.el7.x86_64.rpm"
 compat_libcap1_package_path: "{{ oracle_working_directory }}/{{ compat_libcap1_package }}"
+
+list_of_packages:
+  - "{{ compat_libstdc_package_path }}"
+  - "{{ compat_libcap1_package_path }}"
+  - "{{ oracle_preinstallation_rpm_package_path }}"

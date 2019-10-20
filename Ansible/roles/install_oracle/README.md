@@ -1,31 +1,71 @@
-Role Name
+Oracle Install Role
 =========
 
-A brief description of the role goes here.
+This role will allow users to copy oracle rpm package form s3 bucket and install oracle.  Currently the only supported OS platform is RedHat. 
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Must have an oracle rpm package on s3 bucket.
+RedHat machine with subscription(enabled).
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+oracle_working_directory, oracle_rpm_package, oracle_rpm_package_path, oracle_rpm_bucket_name, oracle_preinstallation_rpm_package_url, oracle_preinstallation_rpm_package_path, compat_libstdc_package_url,
+compat_libcap1_package_url.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+Role to be attached to EC2 instance to copy oracle rpm package form s3 bucket.
+compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm.
+compat-libcap1-1.10-7.el7.x86_64.rpm.
+oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm.
+
 
 Example Playbook
 ----------------
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+---
+- hosts: local
+  roles:
+    - role: install_oracle
+
+  
+  vars:  
+        oracle_working_directory: "/opt/oracle"
+        oracle_preinstallation_rpm_package_url: "https://yum.oracle.com/repo/OracleLinux/OL7/latest/x86_64/getPackage/oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm"
+        oracle_preinstallation_rpm_package: "oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm"
+        oracle_preinstallation_rpm_package_path: "{{ oracle_working_directory }}/{{ oracle_preinstallation_rpm_package }}"
+
+        oracle_rpm_package: "oracle-database-ee-19c-1.0-1.x86_64.rpm"
+        oracle_rpm_package_path: "{{ oracle_working_directory }}/{{ oracle_rpm_package }}"
+        oracle_rpm_bucket_name: "emory-oracle-package"
+
+
+        compat_libstdc_package_url:  "http://mirror.centos.org/centos/7/os/x86_64/Packages/compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm"
+        compat_libstdc_package: "compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm"
+        compat_libstdc_package_path: "{{ oracle_working_directory }}/{{ compat_libstdc_package }}"
+
+        compat_libcap1_package_url:  "http://mirror.centos.org/centos/7/os/x86_64/Packages/compat-libcap1-1.10-7.el7.x86_64.rpm"
+        compat_libcap1_package: "compat-libcap1-1.10-7.el7.x86_64.rpm"
+        compat_libcap1_package_path: "{{ oracle_working_directory }}/{{ compat_libcap1_package }}"
+
+        list_of_packages:
+           - "{{ compat_libstdc_package_path }}"
+           - "{{ compat_libcap1_package_path }}"
+           - "{{ oracle_preinstallation_rpm_package_path }}"
+
+
+
+Tower execution examples
+----------------
+
+Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+
 
 License
 -------
@@ -35,4 +75,6 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Created by: Vijay 
+
+
