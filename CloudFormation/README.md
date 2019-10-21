@@ -15,6 +15,19 @@ Parameters
 Select AWS EC2 instance type e.g t2.medium.  
 
 **KeyName**  
-SSH key to connect EC2 instance.
+SSH key to connect EC2 instance.  
 
+**VpcId**
+VPC in which EC2 instance launch.
 
+**AzName**
+Availability zone to launch EC2 instance.
+
+**SubnetId**
+Subnet for EC2 instance.
+
+**SSHLocation**
+IP address or CIDR from which allow ssh to EC2 instance.
+
+**AmiId**
+Amazon Machine Image id.
