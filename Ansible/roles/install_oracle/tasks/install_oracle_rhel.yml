@@ -20,7 +20,7 @@
 - name: Confirm sufficient disk space available on /opt/oracle
   assert:
     that:
-      - item.size_available|int > 35*1024*1024*1024
+      - item.size_available|int > 15*1024*1024*1024
   when: item.mount == "{{ oracle_working_directory }}"
   with_items: "{{ ansible_mounts }}"
   register: disk_free
