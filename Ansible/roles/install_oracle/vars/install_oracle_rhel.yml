@@ -19,6 +19,8 @@ compat_libcap1_package_url:  "http://mirror.centos.org/centos/7/os/x86_64/Packag
 compat_libcap1_package: "compat-libcap1-1.10-7.el7.x86_64.rpm"
 compat_libcap1_package_path: "{{ oracle_working_directory }}/{{ compat_libcap1_package }}"
 
+no_proxy: "127.0.0.1,localhost,satprod2.cc.emory.edu,satellite.service.emory.edu,169.254.169.254,s3.amazonaws.com,*.s3.amazonaws.com"
+
 list_of_packages:
   - "{{ compat_libstdc_package_path }}"
   - "{{ compat_libcap1_package_path }}"

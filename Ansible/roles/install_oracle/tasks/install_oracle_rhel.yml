@@ -51,6 +51,8 @@
   yum:
     name: "{{  list_of_packages  }}"
     state: present
+  environment:
+         no_proxy: "{{ no_proxy }}"
 
 #Copy oracle from s3 bucket.
 

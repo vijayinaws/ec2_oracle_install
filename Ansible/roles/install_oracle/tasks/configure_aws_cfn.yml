@@ -1,25 +1,32 @@
 ---
+
+#This module is use to conigure aws prerequisite, dependencies, configuration.
+
+
+#Below task upgrade awscli if present, otherwise  install latest awscli.
+#In order to meet version compatibility with boto3 and botocore etc.
+
 - name: install the awscli, boto3  packages, force upgrade.
   pip: 
     state: latest
     name:
       - awscli
       - boto3
+ 
+#- name: Create a aws cfn configuration directory.
+#  file:
+#    path: {{ aws_cfn_directory }}
+#    state: directory
+#    mode: '0755'
 
-- name: Create a aws cfn configuration directory.
-  file:
-    path: {{ aws_cfn_directory }}
-    state: directory
-    mode: '0755'
+#- name: Download aws cfn bootstrap tar file.
+#  get_url:
+#    url: {{ aws_cfn_bootstrap_url }}
+#    dest: {{ aws_cfn_directory }}
+#    mode: '0440'
 
-- name: Download aws cfn bootstrap tar file.
-  get_url:
-    url: {{ aws_cfn_bootstrap_url }}
-    dest: {{ aws_cfn_directory }}
-    mode: '0440'
-
-- name: Install aws cfn bootstrap.
-  shell: easy_install --script-dir {{ aws_cfn_directory }} aws-cfn-bootstrap-latest.tar.gz
+#- name: Install aws cfn bootstrap.
+#  shell: easy_install --script-dir {{ aws_cfn_directory }} aws-cfn-bootstrap-latest.tar.gz
 
 
 

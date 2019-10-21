@@ -1,9 +1,18 @@
 ---
 # tasks file for install_oracle
 
-- debug:                               #Get OS information.
+#Get OS Information.
+
+- debug: 
     msg: "OS Family: {{ ansible_distribution }}"
 
-- include: install_oracle_rhel.yml           #Install oracle when RedHat OS.
+#Install, configure AWS prerequisite.
+
+- include: configure_aws_cfn.yml
+  become: yes
+
+#Install oracle when RedHat OS.
+
+- include: install_oracle_rhel.yml
   become: yes
   when: ansible_distribution == 'RedHat'
