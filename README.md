@@ -1,7 +1,7 @@
 ec2_oracle_install
 =========
 
-This repository consists two two folder Ansible and CloudFromation. 
+This repository consists two folder Ansible and CloudFromation. 
 
 Ansible
 ------------
