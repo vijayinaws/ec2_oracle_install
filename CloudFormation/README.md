@@ -1,7 +1,7 @@
 CloudFormation
 =========
 
-Launce_EC2.yml cloudformation script launch ec2 instamce with
+Launce_EC2.yml cloudformation script launch ec2 instance with
 
  1) RHEL 7 Amazon Machine Image.  
  2) Attach 30 GB volume to EC2 instance.  
@@ -11,7 +11,10 @@ Launce_EC2.yml cloudformation script launch ec2 instamce with
 Parameters
 ------------
 
-InstanceType  
-            Select AWS EC2 instance type e.g t2.medium. 
+**InstanceType**  
+Select AWS EC2 instance type e.g t2.medium.  
+
+**KeyName**  
+SSH key to connect EC2 instance.
 
 
